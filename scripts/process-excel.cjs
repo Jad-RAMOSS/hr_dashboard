@@ -5,19 +5,19 @@ const path = require('path');
 const ROOT_DIR = path.join(__dirname, '..');
 const SRC_DIR = path.join(ROOT_DIR, 'src');
 
-// 1. Process Date Range and Quarter
+// 1. Process Period Config (JSON)
 let period = { start: "N/A", end: "N/A", quarter: "N/A" };
-const dateFile = path.join(ROOT_DIR, 'date_range.txt');
+const configFile = path.join(ROOT_DIR, 'config.json');
 
-if (fs.existsSync(dateFile)) {
-  const content = fs.readFileSync(dateFile, 'utf8');
-  const startMatch = content.match(/start_date:\s*(.*)/);
-  const endMatch = content.match(/end_date:\s*(.*)/);
-  const qMatch = content.match(/(Q[1-4])/i); // Matches Q1, Q2, Q3, Q4
-
-  if (startMatch) period.start = startMatch[1].trim();
-  if (endMatch) period.end = endMatch[1].trim();
-  if (qMatch) period.quarter = qMatch[1].toUpperCase();
+if (fs.existsSync(configFile)) {
+  try {
+    const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    period.start = config.start_date || "N/A";
+    period.end = config.end_date || "N/A";
+    period.quarter = config.quarter || "N/A";
+  } catch (e) {
+    console.error("❌ Error parsing config.json:", e.message);
+  }
 }
 
 // 2. Find and Process Excel

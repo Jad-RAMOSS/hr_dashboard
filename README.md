@@ -1,41 +1,35 @@
 # 📊 HR Attendance Analytics Dashboard - Automated Edition
 
-This dashboard is now fully automated. Whenever you update the Excel file and push it to GitHub, the dashboard will automatically update and redeploy.
+This dashboard is now fully automated. Whenever you update the Excel file or the configuration and push to GitHub, the dashboard will automatically update and redeploy.
 
-## 🚀 How to Update the Dashboard with New Data
+## 🚀 How to Update the Dashboard
 
-This is the easiest way to keep your dashboard up-to-date:
+### 1. Update the Period (Quarter & Dates)
+Edit the `config.json` file in the root directory:
+```json
+{
+  "start_date": "2025-12-26",
+  "end_date": "2026-04-15",
+  "quarter": "Q1"
+}
+```
+- **start_date / end_date:** Use any format you like; it will be displayed exactly as written.
+- **quarter:** Enter Q1, Q2, Q3, or Q4.
 
-1. **Prepare your Excel file:**
-   - Make sure your new data is in an `.xlsx` file.
-   - Keep the column names consistent (e.g., "Code", "Name", "DEPT", etc.).
-   - You can name the file anything (e.g., `Q2_Report.xlsx`).
+### 2. Update the Data (Excel)
+1. Prepare your data in an `.xlsx` file.
+2. Ensure column names like "Code", "Name", and "DEPT" remain the same.
+3. Replace the old `.xlsx` file with your new one.
 
-2. **Upload to GitHub:**
-   - Go to your repository on GitHub.
-   - Delete the old `.xlsx` file and upload your new one (OR just upload it with a new name).
-   - Commit the changes.
-
-3. **Automatic Magic:**
-   - GitHub Actions will detect the new file.
-   - It will automatically run the conversion script to update the data.
-   - It will rebuild the dashboard and deploy it to **GitHub Pages**.
+### 3. Push to GitHub
+Commit your changes and push:
+```bash
+git add .
+git commit -m "Update for new quarter"
+git push origin main
+```
+**GitHub Actions** will then automatically process the data and update your live site!
 
 ## 🛠️ Technical Details
-
-### Automated Pipeline
-- **Script:** `scripts/process-excel.cjs` handles mapping Arabic Excel headers to the dashboard's internal format.
-- **Workflow:** `.github/workflows/deploy.yml` manages the entire build and deploy process on every push.
-- **Base Path:** Configured in `vite.config.js` to work perfectly with GitHub repository subfolders.
-
-### Local Development (If needed)
-If you want to run it on your computer:
-1. `npm install`
-2. `npm run process` (to convert the current Excel file in the root)
-3. `npm run dev` (to start the preview)
-
-## 📊 Features
-- **Dynamic Data:** No more hardcoded data in the code.
-- **Arabic/English Toggle:** Switch between languages instantly.
-- **Interactive Deep-Dive:** Click on departments or employees for detailed breakdowns.
-- **Automatic Deployment:** Professional-grade CI/CD pipeline.
+- **Data Processor:** `scripts/process-excel.cjs` reads `config.json` and your Excel file to generate `src/data.json`.
+- **Deployment:** Uses GitHub Actions (`.github/workflows/deploy.yml`) to build and host on GitHub Pages.
