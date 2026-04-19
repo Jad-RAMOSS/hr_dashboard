@@ -65,11 +65,20 @@ const TABS = [
   { id: "bal_total", key: "bal_total", color: "#F472B6", unit: "days", sub: ["bal_reg", "bal_emerg", "bal_2025"], breakdownKey: "balBreakdown" },
 ];
 
+function parseTime(val) {
+  if (typeof val === "number") return val;
+  if (typeof val === "string" && val.includes(":")) {
+    const [h, m] = val.split(":").map(Number);
+    return h + (m / 60);
+  }
+  return parseFloat(val) || 0;
+}
+
 function ProgressItem({ label, value, unit, color, max, hasSub, isOpen }) {
   const isTime = typeof value === "string" && value.includes(":");
   let pct = 0;
   if (!isTime) pct = Math.min((value / (max || 100)) * 100, 100);
-  else { const [h] = value.split(":").map(Number); pct = Math.min((h / 40) * 100, 100); }
+  else { const h = parseTime(value); pct = Math.min((h / 40) * 100, 100); }
 
   return (
     <div style={{ marginBottom: 12, width: "100%" }}>
@@ -90,23 +99,29 @@ function ProgressItem({ label, value, unit, color, max, hasSub, isOpen }) {
 
 function ProfilePie({ data, t }) {
   const slices = [
-    { name: t.reg, value: data.reg, fill: "#60A5FA" },
-    { name: t.sick, value: data.sick, fill: "#C084FC" },
-    { name: t.off_hol, value: data.off_hol, fill: "#34D399" },
-    { name: t.abs, value: data.abs, fill: "#FB7185" },
+    { name: t.work,      value: parseTime(data.work),      fill: "#34D399" },
+    { name: t.inc_hrs,   value: parseTime(data.inc_hrs),   fill: "#60A5FA" },
+    { name: t.early_hrs, value: parseTime(data.early_hrs), fill: "#818CF8" },
+    { name: t.no_sig,    value: parseTime(data.no_sig),    fill: "#FCD34D" },
+    { name: t.abs,       value: parseTime(data.abs),       fill: "#FB7185" },
+    { name: t.late_hrs,  value: parseTime(data.late_hrs),  fill: "#F87171" },
+    { name: t.reg,       value: parseTime(data.reg),       fill: "#3B82F6" },
+    { name: t.sick,      value: parseTime(data.sick),      fill: "#C084FC" },
+    { name: t.off_hol,   value: parseTime(data.off_hol),   fill: "#10B981" },
+    { name: t.mat,       value: parseTime(data.mat),       fill: "#F43F5E" },
   ].filter(s => s.value > 0);
 
   if (slices.length === 0) return null;
 
   return (
-    <div style={{ height: 180, marginTop: 10 }}>
+    <div style={{ height: 220, marginTop: 10 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={slices} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
+          <Pie data={slices} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={5}>
             {slices.map((s, i) => <Cell key={i} fill={s.fill} />)}
           </Pie>
-          <Tooltip contentStyle={{background:"#0f172a", border:"none", borderRadius:10, fontSize:12}} />
-          <Legend iconType="circle" wrapperStyle={{fontSize:10}} />
+          <Tooltip contentStyle={{background:"#0f172a", border:"none", borderRadius:10, fontSize:12, color:"#fff"}} />
+          <Legend iconType="circle" wrapperStyle={{fontSize:9, paddingTop: 10}} layout="horizontal" align="center" verticalAlign="bottom" />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -115,7 +130,7 @@ function ProfilePie({ data, t }) {
 
 function EmployeeModal({ emp, onClose, lang, t }) {
   const [openSub, setOpenSub] = useState(null);
-  const maxVal = Math.max(...TABS.map(tab => typeof emp[tab.key] === "number" ? emp[tab.key] : 0), 10);
+  const maxVal = Math.max(...TABS.map(tab => parseTime(emp[tab.key])), 10);
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", padding: 16 }}>
@@ -158,8 +173,8 @@ function DeptModal({ deptName, onClose, lang, t, tabId }) {
   const d = DEPTS.find(x => x.name === deptName);
   const tab = TABS.find(x => x.id === tabId);
   const emps = EMPLOYEES.filter(e => e.dept === deptName).sort((a,b) => {
-    const valA = typeof a[tab.key] === "string" && a[tab.key].includes(":") ? parseFloat(a[tab.key].replace(":", ".")) : a[tab.key];
-    const valB = typeof b[tab.key] === "string" && b[tab.key].includes(":") ? parseFloat(b[tab.key].replace(":", ".")) : b[tab.key];
+    const valA = parseTime(a[tab.key]);
+    const valB = parseTime(b[tab.key]);
     return valB - valA;
   });
   const [selEmp, setSelEmp] = useState(null);
@@ -177,7 +192,7 @@ function DeptModal({ deptName, onClose, lang, t, tabId }) {
 
         <div style={{ overflowY: "auto", flex: 1, paddingRight: lang === "ar" ? 0 : 10, paddingLeft: lang === "ar" ? 10 : 0 }}>
           <ProfilePie data={d} t={t} />
-          <h3 style={{fontSize:14, color:"#94A3B8", marginBottom:12}}>{t.employees}</h3>
+          <h3 style={{fontSize:14, color:"#94A3B8", marginBottom:12, marginTop: 20}}>{t.employees}</h3>
           {emps.map(emp => (
             <div key={emp.code} onClick={() => setSelEmp(emp)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 16, background: "rgba(255,255,255,0.02)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = tab.color} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
               <div>
@@ -203,17 +218,21 @@ export default function App() {
   const tab = TABS.find(x => x.id === tabId);
 
   const sortedEmps = [...EMPLOYEES].sort((a, b) => {
-    const valA = typeof a[tab.key] === "string" && a[tab.key].includes(":") ? parseFloat(a[tab.key].replace(":", ".")) : a[tab.key];
-    const valB = typeof b[tab.key] === "string" && b[tab.key].includes(":") ? parseFloat(b[tab.key].replace(":", ".")) : b[tab.key];
+    const valA = parseTime(a[tab.key]);
+    const valB = parseTime(b[tab.key]);
     return valB - valA;
   }).slice(0, 10);
 
   const chartData = sortedEmps.map(e => ({
     name: lang === "ar" ? e.name.split(" ")[0] + " " + e.name.split(" ").pop() : e.name.split(" ")[0],
-    fullName: e.name, value: typeof e[tab.key] === "number" ? e[tab.key] : parseFloat(e[tab.key].replace(":", ".")) || 0, _emp: e
+    fullName: e.name, value: parseTime(e[tab.key]), _emp: e
   }));
 
-  const sortedDepts = [...DEPTS].sort((a, b) => b[tab.key] - a[tab.key]);
+  const sortedDepts = [...DEPTS].sort((a, b) => {
+    const valA = parseTime(a[tab.key]);
+    const valB = parseTime(b[tab.key]);
+    return valB - valA;
+  });
 
   return (
     <div style={{ background: "#0f172a", minHeight: "100vh", direction: lang === "ar" ? "rtl" : "ltr", fontFamily: "'Cairo', sans-serif", color: "#F1F5F9" }}>
@@ -278,7 +297,7 @@ export default function App() {
                   <div style={{ fontWeight: 700, fontSize: 14 }}>{d.name}</div>
                   <div style={{ fontSize: 11, color: "#64748B" }}>{d.count} {t.employees}</div>
                 </div>
-                <div style={{ color: tab.color, fontWeight: 800 }}>{Math.round(d[tab.key] * 10) / 10}</div>
+                <div style={{ color: tab.color, fontWeight: 800 }}>{Math.round(parseTime(d[tab.key]) * 10) / 10}</div>
               </div>
             ))}
           </div>
