@@ -8,6 +8,24 @@ import DATA from "./data.json";
 const EMPLOYEES = DATA.employees;
 const PERIOD = DATA.period;
 
+const COLORS = {
+  work: "#34D399",
+  inc_hrs: "#60A5FA",
+  early_hrs: "#818CF8",
+  no_sig: "#FCD34D",
+  abs: "#FB7185",
+  late_hrs: "#F87171",
+  total_leave: "#C084FC",
+  reg: "#3B82F6",
+  sick: "#C084FC",
+  off_hol: "#10B981",
+  mat: "#F43F5E",
+  bal_total: "#F472B6",
+  bal_reg: "#F472B6",
+  bal_emerg: "#EC4899",
+  bal_2025: "#DB2777"
+};
+
 const DEPT_NAMES = [...new Set(EMPLOYEES.map(e => e.dept))];
 const DEPTS = DEPT_NAMES.map(d => {
   const emps = EMPLOYEES.filter(e => e.dept === d);
@@ -55,14 +73,14 @@ const TRANSLATIONS = {
 };
 
 const TABS = [
-  { id: "work", key: "work", color: "#34D399", unit: "days" },
-  { id: "inc_hrs", key: "inc_hrs", color: "#60A5FA", unit: "hours" },
-  { id: "early_hrs", key: "early_hrs", color: "#818CF8", unit: "hours" },
-  { id: "no_sig", key: "no_sig", color: "#FCD34D", unit: "days" },
-  { id: "abs", key: "abs", color: "#FB7185", unit: "days" },
-  { id: "late_hrs", key: "late_hrs", color: "#F87171", unit: "hours" },
-  { id: "total_leave", key: "total_leave", color: "#C084FC", unit: "days", sub: ["reg", "sick", "off_hol", "mat"], breakdownKey: "leaveBreakdown" },
-  { id: "bal_total", key: "bal_total", color: "#F472B6", unit: "days", sub: ["bal_reg", "bal_emerg", "bal_2025"], breakdownKey: "balBreakdown" },
+  { id: "work", key: "work", color: COLORS.work, unit: "days" },
+  { id: "inc_hrs", key: "inc_hrs", color: COLORS.inc_hrs, unit: "hours" },
+  { id: "early_hrs", key: "early_hrs", color: COLORS.early_hrs, unit: "hours" },
+  { id: "no_sig", key: "no_sig", color: COLORS.no_sig, unit: "days" },
+  { id: "abs", key: "abs", color: COLORS.abs, unit: "days" },
+  { id: "late_hrs", key: "late_hrs", color: COLORS.late_hrs, unit: "hours" },
+  { id: "total_leave", key: "total_leave", color: COLORS.total_leave, unit: "days", sub: ["reg", "sick", "off_hol", "mat"], breakdownKey: "leaveBreakdown" },
+  { id: "bal_total", key: "bal_total", color: COLORS.bal_total, unit: "days", sub: ["bal_reg", "bal_emerg", "bal_2025"], breakdownKey: "balBreakdown" },
 ];
 
 function parseTime(val) {
@@ -99,16 +117,16 @@ function ProgressItem({ label, value, unit, color, max, hasSub, isOpen }) {
 
 function ProfilePie({ data, t }) {
   const slices = [
-    { name: t.work,      value: parseTime(data.work),      fill: "#34D399" },
-    { name: t.inc_hrs,   value: parseTime(data.inc_hrs),   fill: "#60A5FA" },
-    { name: t.early_hrs, value: parseTime(data.early_hrs), fill: "#818CF8" },
-    { name: t.no_sig,    value: parseTime(data.no_sig),    fill: "#FCD34D" },
-    { name: t.abs,       value: parseTime(data.abs),       fill: "#FB7185" },
-    { name: t.late_hrs,  value: parseTime(data.late_hrs),  fill: "#F87171" },
-    { name: t.reg,       value: parseTime(data.reg),       fill: "#3B82F6" },
-    { name: t.sick,      value: parseTime(data.sick),      fill: "#C084FC" },
-    { name: t.off_hol,   value: parseTime(data.off_hol),   fill: "#10B981" },
-    { name: t.mat,       value: parseTime(data.mat),       fill: "#F43F5E" },
+    { name: t.work,      value: parseTime(data.work),      fill: COLORS.work },
+    { name: t.inc_hrs,   value: parseTime(data.inc_hrs),   fill: COLORS.inc_hrs },
+    { name: t.early_hrs, value: parseTime(data.early_hrs), fill: COLORS.early_hrs },
+    { name: t.no_sig,    value: parseTime(data.no_sig),    fill: COLORS.no_sig },
+    { name: t.abs,       value: parseTime(data.abs),       fill: COLORS.abs },
+    { name: t.late_hrs,  value: parseTime(data.late_hrs),  fill: COLORS.late_hrs },
+    { name: t.reg,       value: parseTime(data.reg),       fill: COLORS.reg },
+    { name: t.sick,      value: parseTime(data.sick),      fill: COLORS.sick },
+    { name: t.off_hol,   value: parseTime(data.off_hol),   fill: COLORS.off_hol },
+    { name: t.mat,       value: parseTime(data.mat),       fill: COLORS.mat },
   ].filter(s => s.value > 0);
 
   if (slices.length === 0) return null;
@@ -156,7 +174,7 @@ function EmployeeModal({ emp, onClose, lang, t }) {
                   {tab.sub.map(sk => (
                     <div key={sk} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
                       <span style={{ color: "#94A3B8" }}>{t[sk]}</span>
-                      <span style={{ color: "#E2E8F0", fontWeight: 700 }}>{emp[sk]} {t.days}</span>
+                      <span style={{ color: COLORS[sk] || "#E2E8F0", fontWeight: 700 }}>{emp[sk]} {t.days}</span>
                     </div>
                   ))}
                 </div>
