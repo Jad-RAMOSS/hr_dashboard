@@ -37,7 +37,7 @@ const TRANSLATIONS = {
     days: "يوم", hours: "ساعة", dept: "قسم", pos: "وظيفة", code: "كود",
     leaveBreakdown: "تفاصيل الأجازات", balBreakdown: "تفاصيل الرصيد",
     deptDeepDive: "تفاصيل القسم", distribution: "توزيع الأيام",
-    from: "من", to: "إلى"
+    from: "من", to: "إلى", report: "تقرير"
   },
   en: {
     title: "Attendance Analytics — Damen", langBtn: "العربية",
@@ -50,7 +50,7 @@ const TRANSLATIONS = {
     days: "Days", hours: "Hrs", dept: "Dept", pos: "Pos", code: "Code",
     leaveBreakdown: "Leave Breakdown", balBreakdown: "Balance Breakdown",
     deptDeepDive: "Department Details", distribution: "Days Distribution",
-    from: "From", to: "To"
+    from: "From", to: "To", report: "Report"
   }
 };
 
@@ -222,7 +222,10 @@ export default function App() {
           <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, #3B82F6, #8B5CF6)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>D</div>
           <div>
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{t.title}</h1>
-            <p style={{ margin: 0, fontSize: 10, color: "#94A3B8", fontWeight: 500 }}>
+            <p style={{ margin: 0, fontSize: 10, color: "#94A3B8", fontWeight: 600 }}>
+              <span style={{background: "#3B82F6", color: "#fff", padding: "1px 6px", borderRadius: 4, marginRight: lang === 'en' ? 6 : 0, marginLeft: lang === 'ar' ? 6 : 0}}>
+                {PERIOD.quarter}
+              </span>
               {t.from} <span style={{color: "#F1F5F9"}}>{PERIOD.start}</span> {t.to} <span style={{color: "#F1F5F9"}}>{PERIOD.end}</span>
             </p>
           </div>

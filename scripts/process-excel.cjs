@@ -5,15 +5,19 @@ const path = require('path');
 const ROOT_DIR = path.join(__dirname, '..');
 const SRC_DIR = path.join(ROOT_DIR, 'src');
 
-// 1. Process Date Range
-let period = { start: "N/A", end: "N/A" };
+// 1. Process Date Range and Quarter
+let period = { start: "N/A", end: "N/A", quarter: "N/A" };
 const dateFile = path.join(ROOT_DIR, 'date_range.txt');
+
 if (fs.existsSync(dateFile)) {
   const content = fs.readFileSync(dateFile, 'utf8');
   const startMatch = content.match(/start_date:\s*(.*)/);
   const endMatch = content.match(/end_date:\s*(.*)/);
+  const qMatch = content.match(/(Q[1-4])/i); // Matches Q1, Q2, Q3, Q4
+
   if (startMatch) period.start = startMatch[1].trim();
   if (endMatch) period.end = endMatch[1].trim();
+  if (qMatch) period.quarter = qMatch[1].toUpperCase();
 }
 
 // 2. Find and Process Excel
@@ -75,5 +79,5 @@ const output = {
 fs.writeFileSync(path.join(SRC_DIR, 'data.json'), JSON.stringify(output, null, 2));
 
 console.log(`✅ Successfully updated src/data.json.`);
-console.log(`📅 Period: ${period.start} to ${period.end}`);
+console.log(`📅 Period: ${period.quarter} (${period.start} to ${period.end})`);
 console.log(`👤 Employees: ${processedEmployees.length}`);
