@@ -244,19 +244,21 @@ export default function App() {
           
           <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
             <h3 style={{ margin: "0 0 20px", color: "#94A3B8" }}>{t.top10} - {t[tabId]}</h3>
-            <div style={{ height: 300 }}>
+            <div style={{ height: 320 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 40 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 5, right: 40, top: 20 }}>
                   <XAxis type="number" hide />
                   <YAxis 
                     type="category" 
                     dataKey="name" 
-                    width={lang === "ar" ? 120 : 80} 
+                    width={0} 
                     tick={{ 
-                      fill: "#64748B", 
-                      fontSize: 10, 
+                      fill: "#F8FAFC", 
+                      fontSize: 12, 
+                      fontWeight: 700,
                       textAnchor: lang === "ar" ? "end" : "start",
-                      dx: lang === "ar" ? -10 : 0
+                      dx: lang === "ar" ? -5 : 5,
+                      dy: -14
                     }} 
                     axisLine={false} 
                     tickLine={false} 
