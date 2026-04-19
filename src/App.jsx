@@ -248,7 +248,19 @@ export default function App() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} layout="vertical" margin={{ left: 20, right: 40 }}>
                   <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" width={80} tick={{ fill: "#64748B", fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    width={lang === "ar" ? 120 : 80} 
+                    tick={{ 
+                      fill: "#64748B", 
+                      fontSize: 10, 
+                      textAnchor: lang === "ar" ? "end" : "start",
+                      dx: lang === "ar" ? -10 : 0
+                    }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                  />
                   <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: "#0f172a", border: "none", borderRadius: 12 }} />
                   <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={18} onClick={(d) => setSelEmp(d._emp)} style={{ cursor: "pointer" }}>
                     {chartData.map((_, i) => <Cell key={i} fill={tab.color} />)}
