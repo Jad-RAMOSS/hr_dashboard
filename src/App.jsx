@@ -244,9 +244,9 @@ export default function App() {
           
           <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
             <h3 style={{ margin: "0 0 20px", color: "#94A3B8" }}>{t.top10} - {t[tabId]}</h3>
-            <div style={{ height: 320 }}>
+            <div style={{ height: 320, direction: "ltr", textAlign: "left" }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 40, top: 5, bottom: 5 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 60, top: 5, bottom: 5 }}>
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="name" hide />
                   <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: "#0f172a", border: "none", borderRadius: 12 }} />
@@ -255,10 +255,15 @@ export default function App() {
                     <LabelList 
                       dataKey="fullName" 
                       position="insideLeft" 
-                      offset={10} 
-                      style={{ fill: "#000", fontSize: 12, fontWeight: 800, pointerEvents: "none" }} 
+                      offset={12} 
+                      style={{ fill: "#000", fontSize: 13, fontWeight: 900, pointerEvents: "none" }} 
                     />
-                    <LabelList dataKey="value" position="right" style={{ fill: tab.color, fontSize: 11, fontWeight: 800 }} />
+                    <LabelList 
+                      dataKey="value" 
+                      position="right" 
+                      offset={10}
+                      style={{ fill: tab.color, fontSize: 13, fontWeight: 900 }} 
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
