@@ -1,52 +1,41 @@
-# HR Attendance Analytics Dashboard - Q1 Report
+# 📊 HR Attendance Analytics Dashboard - Automated Edition
 
-This dashboard provides a comprehensive visual analysis of employee attendance and leave for Q1 2026. It is built using **React** and **Recharts**.
+This dashboard is now fully automated. Whenever you update the Excel file and push it to GitHub, the dashboard will automatically update and redeploy.
 
-## ✨ Latest Updates
-- **New Data Columns:** Added support for:
-  - Hours of Incomplete Work (عدم اكتمال الساعات)
-  - Early Departure Hours (الانصراف المبكر)
-  - Missing Signatures (عدم الأمضاء)
-  - Delay Hours (ساعات التأخير)
-  - Vacation Balances (رصيد 2025، الرصيد المتبقي)
-- **UI Bug Fixes:** Fixed a scrolling issue on the main page to allow viewing long lists of departments and employees.
-- **Improved Responsiveness:** Better layout for different screen sizes.
+## 🚀 How to Update the Dashboard with New Data
 
-## 🚀 Deployment Guide
+This is the easiest way to keep your dashboard up-to-date:
 
-### Easiest Way: Netlify Drop (No code needed)
-1. Go to [app.netlify.com/drop](https://app.netlify.com/drop).
-2. Drag the **`deploy`** folder from this project onto the browser page.
-3. Your dashboard is now online!
+1. **Prepare your Excel file:**
+   - Make sure your new data is in an `.xlsx` file.
+   - Keep the column names consistent (e.g., "Code", "Name", "DEPT", etc.).
+   - You can name the file anything (e.g., `Q2_Report.xlsx`).
 
-### Professional Way: Vercel (via GitHub)
-1. Upload the contents of the `deploy` folder to a new GitHub repository.
-2. Connect the repository to [Vercel](https://vercel.com).
-3. Vercel will automatically build and deploy your project.
+2. **Upload to GitHub:**
+   - Go to your repository on GitHub.
+   - Delete the old `.xlsx` file and upload your new one (OR just upload it with a new name).
+   - Commit the changes.
 
-## 💻 Local Development
+3. **Automatic Magic:**
+   - GitHub Actions will detect the new file.
+   - It will automatically run the conversion script to update the data.
+   - It will rebuild the dashboard and deploy it to **GitHub Pages**.
 
-1. **Install Node.js:** Download from [nodejs.org](https://nodejs.org/).
-2. **Navigate to Deploy Folder:**
-   ```bash
-   cd deploy
-   ```
-3. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
-4. **Start Development Server:**
-   ```bash
-   npm run dev
-   ```
+## 🛠️ Technical Details
 
----
+### Automated Pipeline
+- **Script:** `scripts/process-excel.cjs` handles mapping Arabic Excel headers to the dashboard's internal format.
+- **Workflow:** `.github/workflows/deploy.yml` manages the entire build and deploy process on every push.
+- **Base Path:** Configured in `vite.config.js` to work perfectly with GitHub repository subfolders.
+
+### Local Development (If needed)
+If you want to run it on your computer:
+1. `npm install`
+2. `npm run process` (to convert the current Excel file in the root)
+3. `npm run dev` (to start the preview)
 
 ## 📊 Features
-- **Interactive Rankings:** Filter by Work Days, Absenteeism, Missing Signatures, and more.
-- **Department Deep-Dive:** Click any department to see its full breakdown and employee list.
-- **Employee Profiles:** Click any employee to view their specific attendance charts and leave balances.
-- **RTL Support:** Full Arabic language support with the Cairo font for a professional look.
-
-## 📊 Data Source
-The data is sourced from `q1 report.xlsx` and automatically processed into the React components.
+- **Dynamic Data:** No more hardcoded data in the code.
+- **Arabic/English Toggle:** Switch between languages instantly.
+- **Interactive Deep-Dive:** Click on departments or employees for detailed breakdowns.
+- **Automatic Deployment:** Professional-grade CI/CD pipeline.
