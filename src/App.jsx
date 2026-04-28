@@ -259,20 +259,22 @@ export default function App() {
       <main style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 24 }}>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
-              <h3 style={{ margin: "0 0 20px", color: "#94A3B8", fontSize: 15 }}>{t.top10} - {t[tabId]}</h3>
-              {sortedEmps.map(emp => (
-                <div key={emp.code} onClick={() => setSelEmp(emp)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 16, background: "rgba(255,255,255,0.02)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = tab.color} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{emp.name}</div>
-                    <div style={{ fontSize: 10, color: "#64748B" }}>{emp.dept}</div>
+          {tabId !== "avgWork" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
+                <h3 style={{ margin: "0 0 20px", color: "#94A3B8", fontSize: 15 }}>{t.top10} - {t[tabId]}</h3>
+                {sortedEmps.map(emp => (
+                  <div key={emp.code} onClick={() => setSelEmp(emp)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 16, background: "rgba(255,255,255,0.02)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = tab.color} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{emp.name}</div>
+                      <div style={{ fontSize: 10, color: "#64748B" }}>{emp.dept}</div>
+                    </div>
+                    <div style={{ color: tab.color, fontWeight: 800 }}>{emp[tab.key]}</div>
                   </div>
-                  <div style={{ color: tab.color, fontWeight: 800 }}>{emp[tab.key]}</div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)", maxHeight: 800, overflowY: "auto" }}>
             <h3 style={{ margin: "0 0 20px", color: "#94A3B8", fontSize: 15 }}>{t.depts}</h3>
