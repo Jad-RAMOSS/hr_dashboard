@@ -13,7 +13,6 @@ const COLORS = {
   inc_hrs: "#60A5FA",
   early_hrs: "#818CF8",
   no_sig: "#FCD34D",
-  abs: "#FB7185",
   late_hrs: "#F87171",
   total_leave: "#C084FC",
   reg: "#3B82F6",
