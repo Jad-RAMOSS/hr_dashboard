@@ -29,10 +29,11 @@ const COLORS = {
 const DEPT_NAMES = [...new Set(EMPLOYEES.map(e => e.dept))];
 const DEPTS = DEPT_NAMES.map(d => {
   const emps = EMPLOYEES.filter(e => e.dept === d);
+  const totalWork = emps.reduce((s, e) => s + e.work, 0);
   return {
     name: d, count: emps.length,
-    work: emps.reduce((s, e) => s + e.work, 0),
-    abs: emps.reduce((s, e) => s + e.abs, 0),
+    work: totalWork,
+    avg_work: emps.length > 0 ? (totalWork / emps.length).toFixed(1) : 0,
     no_sig: emps.reduce((s, e) => s + e.no_sig, 0),
     total_leave: emps.reduce((s, e) => s + e.total_leave, 0),
     bal_total: emps.reduce((s, e) => s + e.bal_total, 0),
@@ -47,7 +48,7 @@ const TRANSLATIONS = {
   ar: {
     title: "لوحة تحليلات الحضور — Damen", langBtn: "English",
     work: "أيام العمل الفعلية", inc_hrs: "عدم اكتمال الساعات", early_hrs: "الانصراف المبكر",
-    no_sig: "عدم الأمضاء", abs: "غياب بدون أذن", late_hrs: "ساعات التأخير",
+    no_sig: "عدم الأمضاء", late_hrs: "ساعات التأخير",
     total_leave: "إجمالي الأجازات", bal_total: "الرصيد المتبقي",
     reg: "اعتيادي", sick: "مرضي", off_hol: "رسمية", mat: "وضع",
     bal_reg: "رصيد اعتيادي", bal_emerg: "رصيد عارضة", bal_2025: "رصيد 2025",
@@ -55,12 +56,12 @@ const TRANSLATIONS = {
     days: "يوم", hours: "ساعة", dept: "قسم", pos: "وظيفة", code: "كود",
     leaveBreakdown: "تفاصيل الأجازات", balBreakdown: "تفاصيل الرصيد",
     deptDeepDive: "تفاصيل القسم", distribution: "توزيع الأيام",
-    from: "من", to: "إلى", report: "تقرير"
+    avgWork: "متوسط أيام العمل للقسم", from: "من", to: "إلى"
   },
   en: {
     title: "Attendance Analytics — Damen", langBtn: "العربية",
     work: "Actual Work Days", inc_hrs: "Incomplete Hours", early_hrs: "Early Departure",
-    no_sig: "Missing Signatures", abs: "Unexcused Absence", late_hrs: "Delay Hours",
+    no_sig: "Missing Signatures", late_hrs: "Delay Hours",
     total_leave: "Total Leaves", bal_total: "Remaining Balance",
     reg: "Regular", sick: "Sick", off_hol: "Official", mat: "Maternity",
     bal_reg: "Regular Balance", bal_emerg: "Emergency Balance", bal_2025: "2025 Balance",
@@ -68,7 +69,7 @@ const TRANSLATIONS = {
     days: "Days", hours: "Hrs", dept: "Dept", pos: "Pos", code: "Code",
     leaveBreakdown: "Leave Breakdown", balBreakdown: "Balance Breakdown",
     deptDeepDive: "Department Details", distribution: "Days Distribution",
-    from: "From", to: "To", report: "Report"
+    avgWork: "Dept. Avg Work Days", from: "From", to: "To"
   }
 };
 
@@ -77,7 +78,6 @@ const TABS = [
   { id: "inc_hrs", key: "inc_hrs", color: COLORS.inc_hrs, unit: "hours" },
   { id: "early_hrs", key: "early_hrs", color: COLORS.early_hrs, unit: "hours" },
   { id: "no_sig", key: "no_sig", color: COLORS.no_sig, unit: "days" },
-  { id: "abs", key: "abs", color: COLORS.abs, unit: "days" },
   { id: "late_hrs", key: "late_hrs", color: COLORS.late_hrs, unit: "hours" },
   { id: "total_leave", key: "total_leave", color: COLORS.total_leave, unit: "days", sub: ["reg", "sick", "off_hol", "mat"], breakdownKey: "leaveBreakdown" },
   { id: "bal_total", key: "bal_total", color: COLORS.bal_total, unit: "days", sub: ["bal_reg", "bal_emerg", "bal_2025"], breakdownKey: "balBreakdown" },
@@ -118,11 +118,6 @@ function ProgressItem({ label, value, unit, color, max, hasSub, isOpen }) {
 function ProfilePie({ data, t }) {
   const slices = [
     { name: t.work,      value: parseTime(data.work),      fill: COLORS.work },
-    { name: t.inc_hrs,   value: parseTime(data.inc_hrs),   fill: COLORS.inc_hrs },
-    { name: t.early_hrs, value: parseTime(data.early_hrs), fill: COLORS.early_hrs },
-    { name: t.no_sig,    value: parseTime(data.no_sig),    fill: COLORS.no_sig },
-    { name: t.abs,       value: parseTime(data.abs),       fill: COLORS.abs },
-    { name: t.late_hrs,  value: parseTime(data.late_hrs),  fill: COLORS.late_hrs },
     { name: t.reg,       value: parseTime(data.reg),       fill: COLORS.reg },
     { name: t.sick,      value: parseTime(data.sick),      fill: COLORS.sick },
     { name: t.off_hol,   value: parseTime(data.off_hol),   fill: COLORS.off_hol },
@@ -132,14 +127,14 @@ function ProfilePie({ data, t }) {
   if (slices.length === 0) return null;
 
   return (
-    <div style={{ height: 220, marginTop: 10 }}>
+    <div style={{ height: 200, marginTop: 10 }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={slices} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={5}>
+          <Pie data={slices} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
             {slices.map((s, i) => <Cell key={i} fill={s.fill} />)}
           </Pie>
-          <Tooltip contentStyle={{background:"#0f172a", border:"none", borderRadius:10, fontSize:12, color:"#fff"}} />
-          <Legend iconType="circle" wrapperStyle={{fontSize:9, paddingTop: 10}} layout="horizontal" align="center" verticalAlign="bottom" />
+          <Tooltip contentStyle={{background:"#0f172a", border:"none", borderRadius:10, fontSize:11}} />
+          <Legend iconType="circle" wrapperStyle={{fontSize:9}} layout="horizontal" verticalAlign="bottom" />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -190,20 +185,19 @@ function EmployeeModal({ emp, onClose, lang, t }) {
 function DeptModal({ deptName, onClose, lang, t, tabId }) {
   const d = DEPTS.find(x => x.name === deptName);
   const tab = TABS.find(x => x.id === tabId);
-  const emps = EMPLOYEES.filter(e => e.dept === deptName).sort((a,b) => {
-    const valA = parseTime(a[tab.key]);
-    const valB = parseTime(b[tab.key]);
-    return valB - valA;
-  });
+  const emps = EMPLOYEES.filter(e => e.dept === deptName).sort((a,b) => parseTime(b[tab.key]) - parseTime(a[tab.key]));
   const [selEmp, setSelEmp] = useState(null);
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 900, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)", padding: 16 }}>
       <div onClick={e => e.stopPropagation()} style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 24, width: "100%", maxWidth: 600, padding: 24, direction: lang === "ar" ? "rtl" : "ltr", height: "85vh", display: "flex", flexDirection: "column" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 15 }}>
           <div>
             <h2 style={{ margin: 0, color: "#F8FAFC", fontSize: 20 }}>{deptName}</h2>
-            <p style={{ margin: "2px 0 0", color: "#94A3B8", fontSize: 12 }}>{d.count} {t.employees}</p>
+            <div style={{ display: "flex", gap: 12, marginTop: 5 }}>
+              <span style={{ color: "#94A3B8", fontSize: 12 }}>{d.count} {t.employees}</span>
+              <span style={{ color: COLORS.work, fontSize: 12, fontWeight: 700 }}>{t.avgWork}: {d.avg_work}</span>
+            </div>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", fontSize: 20 }}>✕</button>
         </div>
@@ -235,22 +229,9 @@ export default function App() {
   const t = TRANSLATIONS[lang];
   const tab = TABS.find(x => x.id === tabId);
 
-  const sortedEmps = [...EMPLOYEES].sort((a, b) => {
-    const valA = parseTime(a[tab.key]);
-    const valB = parseTime(b[tab.key]);
-    return valB - valA;
-  }).slice(0, 10);
-
-  const chartData = sortedEmps.map(e => ({
-    name: lang === "ar" ? e.name.split(" ")[0] + " " + e.name.split(" ").pop() : e.name.split(" ")[0],
-    fullName: e.name, value: parseTime(e[tab.key]), _emp: e
-  }));
-
-  const sortedDepts = [...DEPTS].sort((a, b) => {
-    const valA = parseTime(a[tab.key]);
-    const valB = parseTime(b[tab.key]);
-    return valB - valA;
-  });
+  const sortedEmps = [...EMPLOYEES].sort((a, b) => parseTime(b[tab.key]) - parseTime(a[tab.key])).slice(0, 10);
+  const sortedDepts = [...DEPTS].sort((a, b) => b[tab.key] - a[tab.key]);
+  const avgDepts = [...DEPTS].sort((a, b) => b.avg_work - a.avg_work);
 
   return (
     <div style={{ background: "#0f172a", minHeight: "100vh", direction: lang === "ar" ? "rtl" : "ltr", fontFamily: "'Cairo', sans-serif", color: "#F1F5F9" }}>
@@ -259,12 +240,7 @@ export default function App() {
           <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, #3B82F6, #8B5CF6)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>D</div>
           <div>
             <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{t.title}</h1>
-            <p style={{ margin: 0, fontSize: 10, color: "#94A3B8", fontWeight: 600 }}>
-              <span style={{background: "#3B82F6", color: "#fff", padding: "1px 6px", borderRadius: 4, marginRight: lang === 'en' ? 6 : 0, marginLeft: lang === 'ar' ? 6 : 0}}>
-                {PERIOD.quarter}
-              </span>
-              {t.from} <span style={{color: "#F1F5F9"}}>{PERIOD.start}</span> {t.to} <span style={{color: "#F1F5F9"}}>{PERIOD.end}</span>
-            </p>
+            <p style={{ margin: 0, fontSize: 10, color: "#94A3B8" }}>{PERIOD.quarter} • {PERIOD.start} - {PERIOD.end}</p>
           </div>
         </div>
         <button onClick={() => setLang(lang === "ar" ? "en" : "ar")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#E2E8F0", padding: "8px 16px", borderRadius: 10, cursor: "pointer", fontWeight: 700 }}>{t.langBtn}</button>
@@ -279,43 +255,42 @@ export default function App() {
       <main style={{ padding: "24px", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 24 }}>
           
-          <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
-            <h3 style={{ margin: "0 0 20px", color: "#94A3B8" }}>{t.top10} - {t[tabId]}</h3>
-            <div style={{ height: 320, direction: "ltr", textAlign: "left" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 60, top: 5, bottom: 5 }}>
-                  <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" hide />
-                  <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: "#0f172a", border: "none", borderRadius: 12 }} />
-                  <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={22} onClick={(d) => setSelEmp(d._emp)} style={{ cursor: "pointer" }}>
-                    {chartData.map((_, i) => <Cell key={i} fill={tab.color} />)}
-                    <LabelList 
-                      dataKey="fullName" 
-                      position="insideLeft" 
-                      offset={12} 
-                      style={{ fill: "#000", fontSize: 13, fontWeight: 900, pointerEvents: "none" }} 
-                    />
-                    <LabelList 
-                      dataKey="value" 
-                      position="right" 
-                      offset={10}
-                      style={{ fill: tab.color, fontSize: 13, fontWeight: 900 }} 
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
+              <h3 style={{ margin: "0 0 20px", color: "#94A3B8", fontSize: 15 }}>{t.top10} - {t[tabId]}</h3>
+              {sortedEmps.map(emp => (
+                <div key={emp.code} onClick={() => setSelEmp(emp)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 16, background: "rgba(255,255,255,0.02)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = tab.color} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{emp.name}</div>
+                    <div style={{ fontSize: 10, color: "#64748B" }}>{emp.dept}</div>
+                  </div>
+                  <div style={{ color: tab.color, fontWeight: 800 }}>{emp[tab.key]}</div>
+                </div>
+              ))}
             </div>
+
+            {tabId === "work" && (
+              <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
+                <h3 style={{ margin: "0 0 20px", color: COLORS.work, fontSize: 15 }}>📊 {t.avgWork}</h3>
+                {avgDepts.map(d => (
+                  <div key={d.name} onClick={() => setSelDept(d.name)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 16, background: "rgba(52, 211, 153, 0.05)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.work} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{d.name}</div>
+                    <div style={{ color: COLORS.work, fontWeight: 800 }}>{d.avg_work} <span style={{fontSize: 10, opacity: 0.8}}>{t.days}</span></div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)", maxHeight: 500, overflowY: "auto" }}>
-            <h3 style={{ margin: "0 0 20px", color: "#94A3B8" }}>{t.depts}</h3>
+          <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)", maxHeight: 800, overflowY: "auto" }}>
+            <h3 style={{ margin: "0 0 20px", color: "#94A3B8", fontSize: 15 }}>{t.depts}</h3>
             {sortedDepts.map(d => (
               <div key={d.name} onClick={() => setSelDept(d.name)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: 16, background: "rgba(255,255,255,0.02)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = tab.color} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 14 }}>{d.name}</div>
                   <div style={{ fontSize: 11, color: "#64748B" }}>{d.count} {t.employees}</div>
                 </div>
-                <div style={{ color: tab.color, fontWeight: 800 }}>{Math.round(parseTime(d[tab.key]) * 10) / 10}</div>
+                <div style={{ color: tab.color, fontWeight: 800 }}>{tabId === "work" ? d.work : Math.round(parseTime(d[tab.key]) * 10) / 10}</div>
               </div>
             ))}
           </div>
