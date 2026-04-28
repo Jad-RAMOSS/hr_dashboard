@@ -32,7 +32,7 @@ const DEPTS = DEPT_NAMES.map(d => {
   return {
     name: d, count: emps.length,
     work: totalWork,
-    avg_work: emps.length > 0 ? (totalWork / emps.length).toFixed(1) : 0,
+    avg_work: emps.length > 0 ? parseFloat((totalWork / emps.length).toFixed(1)) : 0,
     no_sig: emps.reduce((s, e) => s + e.no_sig, 0),
     total_leave: emps.reduce((s, e) => s + e.total_leave, 0),
     bal_total: emps.reduce((s, e) => s + e.bal_total, 0),
@@ -43,10 +43,15 @@ const DEPTS = DEPT_NAMES.map(d => {
   };
 });
 
+const EMPLOYEES_ENHANCED = EMPLOYEES.map(e => {
+  const d = DEPTS.find(dept => dept.name === e.dept);
+  return { ...e, avg_work: d ? d.avg_work : 0 };
+});
+
 const TRANSLATIONS = {
   ar: {
     title: "لوحة تحليلات الحضور — Damen", langBtn: "English",
-    work: "أيام العمل الفعلية", inc_hrs: "عدم اكتمال الساعات", early_hrs: "الانصراف المبكر",
+    work: "أيام العمل الفعلية", avgWork: "متوسط أيام العمل", inc_hrs: "عدم اكتمال الساعات", early_hrs: "الانصراف المبكر",
     no_sig: "عدم الأمضاء", late_hrs: "ساعات التأخير",
     total_leave: "إجمالي الأجازات", bal_total: "الرصيد المتبقي",
     reg: "اعتيادي", sick: "مرضي", off_hol: "رسمية", mat: "وضع",
@@ -55,11 +60,11 @@ const TRANSLATIONS = {
     days: "يوم", hours: "ساعة", dept: "قسم", pos: "وظيفة", code: "كود",
     leaveBreakdown: "تفاصيل الأجازات", balBreakdown: "تفاصيل الرصيد",
     deptDeepDive: "تفاصيل القسم", distribution: "توزيع الأيام",
-    avgWork: "متوسط أيام العمل للقسم", from: "من", to: "إلى"
+    avgWorkFull: "متوسط أيام العمل للقسم", from: "من", to: "إلى"
   },
   en: {
     title: "Attendance Analytics — Damen", langBtn: "العربية",
-    work: "Actual Work Days", inc_hrs: "Incomplete Hours", early_hrs: "Early Departure",
+    work: "Actual Work Days", avgWork: "Dept. Avg Work Days", inc_hrs: "Incomplete Hours", early_hrs: "Early Departure",
     no_sig: "Missing Signatures", late_hrs: "Delay Hours",
     total_leave: "Total Leaves", bal_total: "Remaining Balance",
     reg: "Regular", sick: "Sick", off_hol: "Official", mat: "Maternity",
@@ -68,12 +73,13 @@ const TRANSLATIONS = {
     days: "Days", hours: "Hrs", dept: "Dept", pos: "Pos", code: "Code",
     leaveBreakdown: "Leave Breakdown", balBreakdown: "Balance Breakdown",
     deptDeepDive: "Department Details", distribution: "Days Distribution",
-    avgWork: "Dept. Avg Work Days", from: "From", to: "To"
+    avgWorkFull: "Dept. Avg Work Days", from: "From", to: "To"
   }
 };
 
 const TABS = [
   { id: "work", key: "work", color: COLORS.work, unit: "days" },
+  { id: "avgWork", key: "avg_work", color: COLORS.work, unit: "days" },
   { id: "inc_hrs", key: "inc_hrs", color: COLORS.inc_hrs, unit: "hours" },
   { id: "early_hrs", key: "early_hrs", color: COLORS.early_hrs, unit: "hours" },
   { id: "no_sig", key: "no_sig", color: COLORS.no_sig, unit: "days" },
@@ -184,7 +190,7 @@ function EmployeeModal({ emp, onClose, lang, t }) {
 function DeptModal({ deptName, onClose, lang, t, tabId }) {
   const d = DEPTS.find(x => x.name === deptName);
   const tab = TABS.find(x => x.id === tabId);
-  const emps = EMPLOYEES.filter(e => e.dept === deptName).sort((a,b) => parseTime(b[tab.key]) - parseTime(a[tab.key]));
+  const emps = EMPLOYEES_ENHANCED.filter(e => e.dept === deptName).sort((a,b) => parseTime(b[tab.key]) - parseTime(a[tab.key]));
   const [selEmp, setSelEmp] = useState(null);
 
   return (
@@ -195,7 +201,7 @@ function DeptModal({ deptName, onClose, lang, t, tabId }) {
             <h2 style={{ margin: 0, color: "#F8FAFC", fontSize: 20 }}>{deptName}</h2>
             <div style={{ display: "flex", gap: 12, marginTop: 5 }}>
               <span style={{ color: "#94A3B8", fontSize: 12 }}>{d.count} {t.employees}</span>
-              <span style={{ color: COLORS.work, fontSize: 12, fontWeight: 700 }}>{t.avgWork}: {d.avg_work}</span>
+              <span style={{ color: COLORS.work, fontSize: 12, fontWeight: 700 }}>{t.avgWorkFull}: {d.avg_work}</span>
             </div>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", fontSize: 20 }}>✕</button>
@@ -228,9 +234,8 @@ export default function App() {
   const t = TRANSLATIONS[lang];
   const tab = TABS.find(x => x.id === tabId);
 
-  const sortedEmps = [...EMPLOYEES].sort((a, b) => parseTime(b[tab.key]) - parseTime(a[tab.key])).slice(0, 10);
+  const sortedEmps = [...EMPLOYEES_ENHANCED].sort((a, b) => parseTime(b[tab.key]) - parseTime(a[tab.key])).slice(0, 10);
   const sortedDepts = [...DEPTS].sort((a, b) => b[tab.key] - a[tab.key]);
-  const avgDepts = [...DEPTS].sort((a, b) => b.avg_work - a.avg_work);
 
   return (
     <div style={{ background: "#0f172a", minHeight: "100vh", direction: lang === "ar" ? "rtl" : "ltr", fontFamily: "'Cairo', sans-serif", color: "#F1F5F9" }}>
@@ -267,18 +272,6 @@ export default function App() {
                 </div>
               ))}
             </div>
-
-            {tabId === "work" && (
-              <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)" }}>
-                <h3 style={{ margin: "0 0 20px", color: COLORS.work, fontSize: 15 }}>📊 {t.avgWork}</h3>
-                {avgDepts.map(d => (
-                  <div key={d.name} onClick={() => setSelDept(d.name)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 16, background: "rgba(52, 211, 153, 0.05)", marginBottom: 8, cursor: "pointer", border: "1px solid transparent" }} onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.work} onMouseLeave={e => e.currentTarget.style.borderColor = "transparent"}>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{d.name}</div>
-                    <div style={{ color: COLORS.work, fontWeight: 800 }}>{d.avg_work} <span style={{fontSize: 10, opacity: 0.8}}>{t.days}</span></div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           <div style={{ background: "#1e293b", borderRadius: 24, padding: 24, border: "1px solid rgba(255,255,255,0.05)", maxHeight: 800, overflowY: "auto" }}>
